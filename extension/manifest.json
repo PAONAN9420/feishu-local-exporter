@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "飞书文档本地导出",
+  "version": "0.3.12",
+  "description": "将飞书 Docx / Wiki 正文、原始图片、视频和代码表格保存到浏览器默认下载目录。",
+  "permissions": ["activeTab", "scripting", "downloads", "storage"],
+  "host_permissions": ["https://*.feishu.cn/*"],
+  "action": {"default_title": "保存全文与素材"},
+  "background": {"service_worker": "background.js", "type": "module"},
+  "content_scripts": [{"matches":["https://*.feishu.cn/wiki/*","https://*.feishu.cn/docx/*"],"js":["content.bundle.js"],"run_at":"document_idle"}],
+  "content_security_policy": {"extension_pages": "script-src 'self'; object-src 'none'"}
+}
+
+
+
+
+

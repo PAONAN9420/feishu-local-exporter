@@ -1,0 +1,16 @@
+import {build} from 'esbuild';
+import {mkdir,copyFile,readFile,readdir} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import path from 'node:path';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const source=path.join(root,'extension'), output=path.join(root,'dist');
+const manifest=JSON.parse(await readFile(path.join(source,'manifest.json'),'utf8'));
+const pkg=JSON.parse(await readFile(path.join(root,'package.json'),'utf8'));
+if(manifest.version!==pkg.version)throw new Error('Package and manifest versions differ');
+await build({entryPoints:[path.join(source,'content.mjs')],bundle:true,format:'iife',target:'chrome120',charset:'utf8',outfile:path.join(source,'content.bundle.js'),legalComments:'none'});
+await mkdir(output,{recursive:true});
+const names=['manifest.json','background.js','collector.mjs','core.mjs','browser-downloads.mjs','content.bundle.js','media.mjs'];
+const extras=(await readdir(output)).filter(name=>!names.includes(name));
+if(extras.length)throw new Error('Unexpected dist files; use a fresh output directory: '+extras.join(', '));
+for(const name of names)await copyFile(path.join(source,name),path.join(output,name));
+console.log('PASS built '+names.length+' extension files, version '+manifest.version);
